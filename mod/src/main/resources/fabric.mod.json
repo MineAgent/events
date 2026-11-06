@@ -1,0 +1,25 @@
+{
+	"schemaVersion": 1,
+	"id": "mc-event",
+	"version": "${version}",
+	"name": "MC Event Reporter",
+	"description": "纯客户端模组：把游戏内事件（玩家受伤、获得物品）以 JSON POST 到本机 127.0.0.1:3422，供外部程序实时订阅。事件从客户端本来就收到的原版网络包中读取，因此连接原版服务器也能用。",
+	"authors": [
+		"MineAgent"
+	],
+	"license": "LGPL-3.0-only",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"com.mineagent.mcevent.McEventClient"
+		]
+	},
+	"mixins": [
+		"mcevent.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.19.5",
+		"minecraft": "~26.2",
+		"java": ">=25"
+	}
+}

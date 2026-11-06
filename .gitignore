@@ -1,0 +1,5 @@
+mod/build/
+mod/.gradle/
+mod/run/
+.idea/
+*.iml
