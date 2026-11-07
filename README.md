@@ -5,7 +5,7 @@
 | 目录 | 内容 |
 |---|---|
 | [`server/tcp_server.py`](server/tcp_server.py) | 接收端：只依赖 Python 标准库的 TCP/HTTP 服务，把事件按行打印到屏幕 |
-| [`mod/`](mod/) | Fabric 模组 **MC Event Reporter 1.1.0**：**纯客户端**，Minecraft 26.2 + Fabric Loader 0.19.5，不依赖 Fabric API、不需要服务端安装 |
+| [`mod/`](mod/) | Fabric 模组 **MC Event Reporter 1.1.1**：**纯客户端**，Minecraft 26.2 + Fabric Loader 0.19.5，不依赖 Fabric API、不需要服务端安装 |
 
 ## 1. 启动接收端
 
@@ -34,7 +34,7 @@ curl -X POST -H 'Content-Type: application/json' \
 ```sh
 cd mod
 ./gradlew build
-cp build/libs/mc-event-1.1.0.jar ~/.minecraft/mods/
+cp build/libs/mc-event-1.1.1.jar ~/.minecraft/mods/
 ```
 
 把 jar 放进 26.2-Fabric 实例的 `mods/` 后正常启动游戏即可。
@@ -44,6 +44,30 @@ cp build/libs/mc-event-1.1.0.jar ~/.minecraft/mods/
 
 `mod/libs/baritone-api-fabric-1.19.0.jar` 只是 Baritone 的编译期依赖（`compileOnly`），
 不会打进模组；运行时直接用 `mods/` 里的 Baritone，没装 Baritone 时相关功能自动跳过。
+
+### 3420 `/evt/` 事件目录（可选）
+
+装了 MGHttpdProvider 时会额外在共享服务上挂一个只读目录：
+
+```sh
+curl -s http://127.0.0.1:3420/evt/
+```
+
+每行是「事件 type + `data` 里的字段名」，用空格分隔，字段顺序与 JSON 里的顺序一致：
+
+```
+player_hurt damage_type attacker_type attacker health_before health_after absorption_before absorption_after health_lost absorption_lost damage_taken max_health hits_same_tick
+item_pickup item count
+chat message
+hunger_change from to threshold
+baritone_task_end result goal
+dimension_change from to
+player_death message damage_type attacker attacker_type
+player_respawn dimension
+```
+
+这是静态目录，不返回事件内容；实际事件仍然 POST 到 `127.0.0.1:3422`。
+没装 MGHttpdProvider 时该端点不存在，模组其它功能不受影响。
 
 ## 3. 事件格式
 

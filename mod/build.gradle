@@ -25,6 +25,10 @@ dependencies {
 	// Baritone 的 API，仅编译期使用：运行时由 mods/ 里的 Baritone 提供，
 	// 没装 Baritone 时相关类不会被加载。
 	compileOnly files('libs/baritone-api-fabric-1.19.0.jar')
+
+	// MGHttpdProvider 的注册 API，仅编译期使用：没装 provider 时不挂 /evt，也
+	// 不会加载引用它的类。
+	compileOnly files('libs/httpdprovider-1.1.1.jar')
 }
 
 processResources {

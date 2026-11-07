@@ -25,6 +25,17 @@ public final class McEventClient implements ClientModInitializer {
         } else {
             LOGGER.info("mc-event: 未安装 Baritone，跳过任务结束事件");
         }
+
+        if (FabricLoader.getInstance().isModLoaded("httpdprovider")) {
+            try {
+                EventHttpHook.register();
+                LOGGER.info("mc-event: 已挂载 /evt 事件目录");
+            } catch (Throwable throwable) {
+                LOGGER.warn("mc-event: 挂载 /evt 失败，忽略该端点", throwable);
+            }
+        } else {
+            LOGGER.info("mc-event: 未安装 MGHttpdProvider，跳过 /evt 事件目录");
+        }
     }
 
     /** 每个客户端 tick 调用；没装 Baritone 时不会加载 BaritoneHook。 */
