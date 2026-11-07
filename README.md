@@ -5,7 +5,7 @@
 | 目录 | 内容 |
 |---|---|
 | [`server/tcp_server.py`](server/tcp_server.py) | 接收端：只依赖 Python 标准库的 TCP/HTTP 服务，把事件按行打印到屏幕 |
-| [`mod/`](mod/) | Fabric 模组 **MC Event Reporter 1.0.0**：**纯客户端**，Minecraft 26.2 + Fabric Loader 0.19.5，不依赖 Fabric API、不需要服务端安装 |
+| [`mod/`](mod/) | Fabric 模组 **MC Event Reporter 1.1.0**：**纯客户端**，Minecraft 26.2 + Fabric Loader 0.19.5，不依赖 Fabric API、不需要服务端安装 |
 
 ## 1. 启动接收端
 
@@ -34,7 +34,7 @@ curl -X POST -H 'Content-Type: application/json' \
 ```sh
 cd mod
 ./gradlew build
-cp build/libs/mc-event-1.0.0.jar ~/.minecraft/mods/
+cp build/libs/mc-event-1.1.0.jar ~/.minecraft/mods/
 ```
 
 把 jar 放进 26.2-Fabric 实例的 `mods/` 后正常启动游戏即可。
@@ -75,6 +75,8 @@ cp build/libs/mc-event-1.0.0.jar ~/.minecraft/mods/
 | `hunger_change` | 饥饿值向下跨过 18 / 6 / 0 |
 | `baritone_task_end` | Baritone 任务结束（装了 Baritone 才会上报） |
 | `dimension_change` | 客户端维度发生变化 |
+| `player_death` | 本机玩家死亡 |
+| `player_respawn` | 死亡后重生 |
 
 ### `player_hurt`（受伤）
 
@@ -175,6 +177,35 @@ cp build/libs/mc-event-1.0.0.jar ~/.minecraft/mods/
 
 ```json
 {"data":{"from":"minecraft:overworld","to":"minecraft:the_nether"}}
+```
+
+### `player_death`（死亡）
+
+收到本机玩家的死亡消息包时上报；`damage_type` / `attacker` / `attacker_type` 取自最近一次
+`player_hurt`，没有受伤记录（例如 `/kill`）时为 `null`。
+
+| `data` 字段 | 说明 |
+|---|---|
+| `message` | 原版死亡消息全文（含玩家名） |
+| `damage_type` | 最近一次伤害类型 |
+| `attacker` / `attacker_type` | 最近一次伤害的造成者名称 / 类型 |
+
+```json
+{"type":"player_death","time":217242,
+ "data":{"message":"Steve 试图在熔岩里游泳","damage_type":"minecraft:lava","attacker":null,"attacker_type":null}}
+```
+
+### `player_respawn`（重生）
+
+死亡后在重生界面点重生时上报，`dimension` 是重生后的维度。传送门跨维度不会触发它，
+只会触发 `dimension_change`。
+
+| `data` 字段 | 说明 |
+|---|---|
+| `dimension` | 重生后的维度 ID |
+
+```json
+{"type":"player_respawn","time":217442,"data":{"dimension":"minecraft:overworld"}}
 ```
 
 ## 4. 以后加新事件

@@ -2,8 +2,9 @@ package com.mineagent.mcevent.mixin;
 
 import com.mineagent.mcevent.DimensionTracker;
 import com.mineagent.mcevent.HungerTracker;
-import com.mineagent.mcevent.McEventClient;
 import com.mineagent.mcevent.HurtTracker;
+import com.mineagent.mcevent.LifecycleTracker;
+import com.mineagent.mcevent.McEventClient;
 import net.minecraft.client.Minecraft;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -17,6 +18,7 @@ public abstract class MinecraftMixin {
         Minecraft minecraft = Minecraft.getInstance();
         HurtTracker.onEndTick(minecraft);
         HungerTracker.onEndTick(minecraft);
+        LifecycleTracker.onEndTick(minecraft);
         DimensionTracker.onEndTick(minecraft);
         McEventClient.tickBaritone();
     }

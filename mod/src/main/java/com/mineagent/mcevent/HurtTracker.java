@@ -37,6 +37,11 @@ public final class HurtTracker {
     private static float lastHealth = Float.NaN;
     private static float lastAbsorption = Float.NaN;
 
+    /** 最近一次伤害的信息，player_death 会带上；没有受伤记录时为 null。 */
+    private static String lastDamageType;
+    private static String lastAttacker;
+    private static String lastAttackerType;
+
     private HurtTracker() {
     }
 
@@ -66,7 +71,22 @@ public final class HurtTracker {
             }
         }
 
+        lastDamageType = damageType;
+        lastAttacker = attacker;
+        lastAttackerType = attackerType;
         PENDING.add(new Pending(damageType, attackerType, attacker, lastHealth, lastAbsorption, tick));
+    }
+
+    static String lastDamageType() {
+        return lastDamageType;
+    }
+
+    static String lastAttacker() {
+        return lastAttacker;
+    }
+
+    static String lastAttackerType() {
+        return lastAttackerType;
     }
 
     public static void onEndTick(Minecraft minecraft) {
