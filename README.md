@@ -5,7 +5,7 @@
 | 目录 | 内容 |
 |---|---|
 | [`server/tcp_server.py`](server/tcp_server.py) | 接收端：只依赖 Python 标准库的 TCP/HTTP 服务，把事件按行打印到屏幕 |
-| [`mod/`](mod/) | Fabric 模组 **MC Event Reporter 1.1.1**：**纯客户端**，Minecraft 26.2 + Fabric Loader 0.19.5，不依赖 Fabric API、不需要服务端安装 |
+| [`mod/`](mod/) | Fabric 模组 **MC Event Reporter 1.1.2**：**纯客户端**，Minecraft 26.2 / 26.3 + Fabric Loader 0.19.5+，不依赖 Fabric API、不需要服务端安装 |
 
 ## 1. 启动接收端
 
@@ -34,10 +34,14 @@ curl -X POST -H 'Content-Type: application/json' \
 ```sh
 cd mod
 ./gradlew build
-cp build/libs/mc-event-1.1.1.jar ~/.minecraft/mods/
+cp build/libs/mc-event-1.1.2.jar ~/.minecraft/mods/
 ```
 
-把 jar 放进 26.2-Fabric 实例的 `mods/` 后正常启动游戏即可。
+把 jar 放进 26.2 或 26.3 的 `26.x-Fabric` 实例的 `mods/` 后正常启动游戏即可。
+
+26.3（Fabric Loader 0.20.1）实测：同一份 `mc-event-1.1.2.jar` 正常加载，`/evt` 挂在 3420 上；
+触发聊天和 `/damage` 后接收端分别收到 `chat` / `player_hurt` JSON。Baritone 相关代码保持 1.19.0
+编译期依赖不变，26.3 的 Baritone 适配不在本次范围。
 
 目标地址默认是 `http://127.0.0.1:3422/`，需要改的话给 JVM 加参数
 `-Dmcevent.endpoint=http://127.0.0.1:其它端口/`。
