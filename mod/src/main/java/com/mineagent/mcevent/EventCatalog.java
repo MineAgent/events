@@ -25,6 +25,7 @@ final class EventCatalog {
         EVENTS.put("item_pickup", List.of("item", "count"));
         EVENTS.put("chat", List.of("message"));
         EVENTS.put("hunger_change", List.of("from", "to", "threshold"));
+        EVENTS.put("can_sleep", List.of("reason"));
         EVENTS.put("baritone_task_end", List.of("result", "goal"));
         EVENTS.put("dimension_change", List.of("from", "to"));
         EVENTS.put("player_death", List.of("message", "damage_type", "attacker", "attacker_type"));

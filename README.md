@@ -5,7 +5,7 @@
 | 目录 | 内容 |
 |---|---|
 | [`server/tcp_server.py`](server/tcp_server.py) | 接收端：只依赖 Python 标准库的 TCP/HTTP 服务，把事件按行打印到屏幕 |
-| [`mod/`](mod/) | Fabric 模组 **MC Event Reporter 1.1.2**：**纯客户端**，Minecraft 26.2 / 26.3 + Fabric Loader 0.19.5+，不依赖 Fabric API、不需要服务端安装 |
+| [`mod/`](mod/) | Fabric 模组 **MC Event Reporter 1.2.0**：**纯客户端**，Minecraft 26.3 + Fabric Loader 0.19.5+，不依赖 Fabric API、不需要服务端安装 |
 
 ## 1. 启动接收端
 
@@ -34,14 +34,16 @@ curl -X POST -H 'Content-Type: application/json' \
 ```sh
 cd mod
 ./gradlew build
-cp build/libs/mc-event-1.1.2.jar ~/.minecraft/mods/
+cp build/libs/mc-event-1.2.0.jar ~/.minecraft/mods/
 ```
 
-把 jar 放进 26.2 或 26.3 的 `26.x-Fabric` 实例的 `mods/` 后正常启动游戏即可。
+把 jar 放进 26.3 的 `26.3-Fabric` 实例的 `mods/` 后正常启动游戏即可。
 
-26.3（Fabric Loader 0.20.1）实测：同一份 `mc-event-1.1.2.jar` 正常加载，`/evt` 挂在 3420 上；
-触发聊天和 `/damage` 后接收端分别收到 `chat` / `player_hurt` JSON。Baritone 相关代码保持 1.19.0
-编译期依赖不变，26.3 的 Baritone 适配不在本次范围。
+26.3（Fabric Loader 0.20.1）实测：`mc-event-1.1.2.jar` 正常加载，`/evt` 挂在 3420 上；
+触发聊天和 `/damage` 后接收端分别收到 `chat` / `player_hurt` JSON。1.2.0 新增
+`can_sleep` 事件，并在 26.3 隔离实例中实测：`/time set night` 收到 `reason=night`，
+白天 `/weather thunder` 收到 `reason=thunder`，夜晚再打雷不重复上报。
+Baritone 相关代码保持 1.19.0 编译期依赖不变，26.3 的 Baritone 适配不在本次范围。
 
 目标地址默认是 `http://127.0.0.1:3422/`，需要改的话给 JVM 加参数
 `-Dmcevent.endpoint=http://127.0.0.1:其它端口/`。
@@ -64,6 +66,7 @@ player_hurt damage_type attacker_type attacker health_before health_after absorp
 item_pickup item count
 chat message
 hunger_change from to threshold
+can_sleep reason
 baritone_task_end result goal
 dimension_change from to
 player_death message damage_type attacker attacker_type
@@ -101,6 +104,7 @@ player_respawn dimension
 | `item_pickup` | 本地玩家捡起物品 |
 | `chat` | 聊天栏收到任意一行文本 |
 | `hunger_change` | 饥饿值向下跨过 18 / 6 / 0 |
+| `can_sleep` | 从不能睡变为能睡（入夜或雷暴开始） |
 | `baritone_task_end` | Baritone 任务结束（装了 Baritone 才会上报） |
 | `dimension_change` | 客户端维度发生变化 |
 | `player_death` | 本机玩家死亡 |
@@ -177,6 +181,28 @@ player_respawn dimension
 {"data":{"from":18,"to":17,"threshold":18}}
 {"data":{"from":7,"to":6,"threshold":6}}
 {"data":{"from":1,"to":0,"threshold":0}}
+```
+
+### `can_sleep`（可以睡觉了）
+
+只在**从不能睡变为能睡**的那一 tick 上报一次，`reason` 说明是哪一种情况让睡觉变为可行：
+
+| `reason` | 触发原因 |
+|---|---|
+| `night` | 入夜 / 天空变暗；雷暴没有参与这次状态变化 |
+| `thunder` | 雷暴开始，使天空变暗并解锁睡觉 |
+
+“能睡”直接使用客户端当前维度的原版床规则（`BED_RULE`），与游戏内能否躺下一致；
+下界、末地等固定时间维度不会上报。进入世界、重生、切换维度的第一 tick 只记录基线，
+不会因为“进去时正好是夜晚”补报；已经在能睡状态时雷暴开始也不会重复上报。
+
+| `data` 字段 | 说明 |
+|---|---|
+| `reason` | `night` 或 `thunder` |
+
+```json
+{"type":"can_sleep","time":208100,"position":{"x":2.5,"y":134.0,"z":6.5},"data":{"reason":"night"}}
+{"type":"can_sleep","time":214600,"position":{"x":2.5,"y":134.0,"z":6.5},"data":{"reason":"thunder"}}
 ```
 
 ### `baritone_task_end`（Baritone 任务结束）

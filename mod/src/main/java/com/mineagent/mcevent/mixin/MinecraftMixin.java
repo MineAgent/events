@@ -5,6 +5,7 @@ import com.mineagent.mcevent.HungerTracker;
 import com.mineagent.mcevent.HurtTracker;
 import com.mineagent.mcevent.LifecycleTracker;
 import com.mineagent.mcevent.McEventClient;
+import com.mineagent.mcevent.SleepTracker;
 import net.minecraft.client.Minecraft;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -20,6 +21,7 @@ public abstract class MinecraftMixin {
         HungerTracker.onEndTick(minecraft);
         LifecycleTracker.onEndTick(minecraft);
         DimensionTracker.onEndTick(minecraft);
+        SleepTracker.onEndTick(minecraft);
         McEventClient.tickBaritone();
     }
 }
